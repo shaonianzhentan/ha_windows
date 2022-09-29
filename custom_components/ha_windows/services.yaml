@@ -1,0 +1,65 @@
+update_tile:
+  name: Update Tile
+  description: 更新磁贴
+  fields:
+    from:
+      name: From
+      description: 来源
+      required: true
+      example: "from"
+      selector:
+        text:
+    subject:
+      name: Subject
+      description: 主题
+      required: true
+      example: "subject"
+      selector:
+        text:
+    body:
+      name: Body
+      description: 正文
+      required: true
+      example: "body"
+      selector:
+        text:
+clear_tile:
+  name: Clear Tile
+  description: 清除磁贴
+tts:
+  name: TTS
+  description: 文本转语音播报
+  fields:
+    text:
+      name: Text
+      description: 文本内容
+      required: true
+      example: "你好啊"
+      selector:
+        text:
+cmd:
+  name: Command
+  description: Windows CMD命令
+  fields:
+    text:
+      name: Text
+      description: 命令文本
+      required: true
+      example: "shutdown -s -f -t 600"
+      selector:
+        text:
+shutdown:
+  name: Shutdown
+  description: 调用关机命令
+  fields:
+    second:
+      name: Second
+      description: 倒计时多少秒关机
+      required: true
+      example: 60
+      selector:
+        number:
+          min: 0
+          max: 600
+          step: 1
+          mode: slider

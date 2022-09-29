@@ -1,0 +1,14 @@
+{
+    "title": "家庭助理Windows应用",
+    "config": {
+        "abort": {
+            "single_instance_allowed": "仅允许单个配置"
+        },
+        "step": {
+            "user": {
+                "description": "必须先安装云音乐插件：https://github.com/shaonianzhentan/ha_cloud_music",
+                "data": {}
+            }
+        }
+    }
+}
