@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from contextlib import suppress
-from datetime import timedelta
+from datetime import timedelta, datetime
 import hashlib
 import logging
 import os
@@ -125,8 +125,18 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
     # 消息接收
     def ws_receive_data(self, hass, connection, msg):
         data = msg['data']
-        
+        msg_type = data.get('type', '')
 
+        if msg_type == 'init':
+            print('初始化')
+            
+        elif msg_type == 'update':
+            # 更新
+            self._attr_media_position = data.get('media_position', 0)
+            self._attr_media_duration = data.get('media_duration', 0)
+            self._attr_volume_level = data.get('volume_level')
+            self._attr_muted = data.get('is_volume_muted')
+            self._attr_media_position_updated_at = datetime.now()
 
     @property
     def device_info(self):
