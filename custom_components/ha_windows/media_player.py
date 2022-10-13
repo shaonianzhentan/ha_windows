@@ -22,6 +22,23 @@ from homeassistant.const import (
     STATE_UNAVAILABLE
 )
 from homeassistant.components.media_player.const import (
+    SUPPORT_BROWSE_MEDIA,
+    SUPPORT_TURN_OFF,
+    SUPPORT_TURN_ON,
+    SUPPORT_VOLUME_STEP,
+    SUPPORT_VOLUME_SET,
+    SUPPORT_VOLUME_MUTE,
+    SUPPORT_SELECT_SOURCE,
+    SUPPORT_SELECT_SOUND_MODE,
+    SUPPORT_PLAY_MEDIA,
+    SUPPORT_PLAY,
+    SUPPORT_PAUSE,
+    SUPPORT_SEEK,
+    SUPPORT_CLEAR_PLAYLIST,
+    SUPPORT_SHUFFLE_SET,
+    SUPPORT_REPEAT_SET,
+    SUPPORT_NEXT_TRACK,
+    SUPPORT_PREVIOUS_TRACK,
     MEDIA_TYPE_MUSIC
 )
 from homeassistant.core import HomeAssistant
@@ -35,45 +52,41 @@ _LOGGER = logging.getLogger(__name__)
 
 from .manifest import manifest
 
-PLAYLIST_UPDATE_INTERVAL = timedelta(seconds=120)
-
-SUPPORT_MPD = (
-    MediaPlayerEntityFeature.PAUSE
-    | MediaPlayerEntityFeature.PREVIOUS_TRACK
-    | MediaPlayerEntityFeature.NEXT_TRACK
-    | MediaPlayerEntityFeature.PLAY_MEDIA
-    | MediaPlayerEntityFeature.PLAY
-    | MediaPlayerEntityFeature.CLEAR_PLAYLIST
-    | MediaPlayerEntityFeature.REPEAT_SET
-    | MediaPlayerEntityFeature.SHUFFLE_SET
-    | MediaPlayerEntityFeature.SEEK
-    | MediaPlayerEntityFeature.STOP
-    | MediaPlayerEntityFeature.TURN_OFF
-    | MediaPlayerEntityFeature.TURN_ON
-    | MediaPlayerEntityFeature.BROWSE_MEDIA
-)
+SUPPORT_FEATURES = SUPPORT_VOLUME_STEP | SUPPORT_VOLUME_MUTE | SUPPORT_VOLUME_SET | \
+    SUPPORT_SELECT_SOURCE | SUPPORT_SELECT_SOUND_MODE | \
+    SUPPORT_PLAY_MEDIA | SUPPORT_PLAY | SUPPORT_PAUSE | SUPPORT_PREVIOUS_TRACK | SUPPORT_NEXT_TRACK | \
+    SUPPORT_BROWSE_MEDIA | SUPPORT_SEEK | SUPPORT_CLEAR_PLAYLIST | SUPPORT_SHUFFLE_SET | SUPPORT_REPEAT_SET
 
 async def async_setup_entry(
     hass: HomeAssistant,
     entry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    config = entity.data    
-    entity = HaWindowsMediaPlayer(hass, config['dev_id'])
-    hass.data[entry.entry_id] == entity
+    config = entry.data
+    dev_id = config['dev_id']
+    entity = HaWindowsMediaPlayer(hass, dev_id)
+
+    hass.data.setdefault(dev_id, entity)
+
     async_add_entities([entity], True)
 
 class HaWindowsMediaPlayer(MediaPlayerEntity):
 
-    _attr_media_content_type = MEDIA_TYPE_MUSIC
-
-    # pylint: disable=no-member
     def __init__(self, hass, dev_id):
         self.hass = hass
         self._attr_unique_id = dev_id
-        self._attr_name = manifest.name
         self._attr_media_image_remotely_accessible = True
         self._attr_device_class = MediaPlayerDeviceClass.TV.value
+        self._attr_supported_features = SUPPORT_FEATURES
+        
+        # default attribute
+        self._attr_source_list = []
+        self._attr_sound_mode_list = []
+        self._attr_name = manifest.name
+        self._attr_state =  STATE_ON
+        self._attr_volume_level = 1
+        self._attr_repeat = 'all'
+        self._attr_shuffle = False
         
         self.playlist = []
         self.playindex = 0
@@ -93,7 +106,8 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
 
     async def async_update(self) -> None:
         # 60秒无更新，则中断
-        if datetime.now() - self._attr_media_position_updated_at > 60:
+        s = (datetime.now() - self._attr_media_position_updated_at).total_seconds()
+        if s > 60:
             self._attr_state = STATE_OFF
 
     async def async_set_volume_level(self, volume: float) -> None:
@@ -156,8 +170,7 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
             self.call_windows_app('music_url', media_id)
 
     def call_windows_app(self, type, data = ''):
-        ha = self.hass.data[manifest.domain]
-        ha.fire_event({
+        self.hass.data[manifest.domain].fire_event({
             'dev_id': self._attr_unique_id,
             'type': type,
             'data': data
@@ -168,3 +181,9 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
         for item in self.playlist:
             arr.append(item.url)
         self.call_windows_app('music_load', arr)
+
+    def init_playlist(self):
+        arr = []
+        for item in self.playlist:
+            arr.append(item.url)
+        self.call_windows_app('music_init', arr)

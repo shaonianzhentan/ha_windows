@@ -38,23 +38,19 @@ class HaWindows():
         self.connection = connection
 
         data = msg['data']
+        print(data)
+
         msg_type = data.get('type', '')
         dev_id = data.get('dev_id')
 
         player = hass.data.get(dev_id)
-        if msg_type == 'init':
-            if player is None:
-                # 注册设备
-                entry = ConfigEntry(1, manifest.domain, manifest.name, {
-                    'dev_id': dev_id
-                }, 'user')
-                hass.config_entries.async_setup_platforms(entry, PLATFORMS)
-            else:
-                # 更新数据
-                player._attr_state = STATE_ON
-                # 初始化数据
-                self.load_playlist()
 
+        if player is None:
+            return
+
+        if msg_type == 'init':
+            # 初始化数据
+            player.init_playlist()
         elif msg_type == 'music_info':
             # 更新
             state = data.get('state')

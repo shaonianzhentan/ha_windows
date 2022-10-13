@@ -13,6 +13,10 @@ from .manifest import manifest
 
 DOMAIN = manifest.domain
 
+DATA_SCHEMA = vol.Schema({
+    vol.Required('dev_id'): str
+})
+
 class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
@@ -20,13 +24,13 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Handle the initial step."""
-        if self._async_current_entries():
-            return self.async_abort(reason="single_instance_allowed")
 
         errors = {}
         if user_input is not None:
+
+            if self.hass.data.get(user_input.get('dev_id')) is not None:
+                return self.async_abort(reason="single_instance_allowed")
+
             return self.async_create_entry(title=DOMAIN, data=user_input)
 
-        DATA_SCHEMA = vol.Schema({})
         return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA, errors=errors)
