@@ -177,13 +177,19 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
         })
 
     def load_playlist(self):
-        arr = []
+        playlist = []
         for item in self.playlist:
-            arr.append(item.url)
-        self.call_windows_app('music_load', arr)
+            playlist.append(item.url)
+        self.call_windows_app('music_load', {
+            'playindex': self.playindex,
+            'playlist': playlist
+        })
 
     def init_playlist(self):
-        arr = []
+        playlist = []
         for item in self.playlist:
-            arr.append(item.url)
-        self.call_windows_app('music_init', arr)
+            playlist.append(item.url)
+        self.call_windows_app('music_init', {
+            'playindex': self.playindex,
+            'playlist': playlist
+        })

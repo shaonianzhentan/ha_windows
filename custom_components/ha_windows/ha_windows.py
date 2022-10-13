@@ -40,8 +40,9 @@ class HaWindows():
         data = msg['data']
         print(data)
 
-        msg_type = data.get('type', '')
         dev_id = data.get('dev_id')
+        msg_type = data.get('type', '')
+        msg_data = data.get('data', {})
 
         player = hass.data.get(dev_id)
 
@@ -53,7 +54,7 @@ class HaWindows():
             player.init_playlist()
         elif msg_type == 'music_info':
             # 更新
-            state = data.get('state')
+            state = msg_data.get('state')
             if state == 'playing':
                 state = STATE_PLAYING
             elif state == 'paused':
@@ -61,8 +62,9 @@ class HaWindows():
             else:
                 state = STATE_ON
 
-            playindex = data.get('index')
-            if player.playindex != playindex:
+            print(player)
+            playindex = msg_data.get('index', 0)
+            if  player.playindex != playindex and len(player.playlist) > playindex:
                 player.playindex = playindex
                 music_info = player.playlist[playindex]
                 player._attr_app_name = music_info.singer
@@ -72,13 +74,14 @@ class HaWindows():
                 player._attr_media_artist = music_info.singer
 
             player._attr_state = state
-            player._attr_media_position = data.get('media_position', 0)
-            player._attr_media_duration = data.get('media_duration', 0)
-            player._attr_volume_level = data.get('volume')
-            player._attr_repeat = data.get('repeat')
-            player._attr_shuffle = data.get('shuffle')
-            player._attr_muted = data.get('muted')
+            player._attr_media_position = msg_data.get('media_position', 0)
+            player._attr_media_duration = msg_data.get('media_duration', 0)
+            player._attr_volume_level = msg_data.get('volume')
+            player._attr_repeat = msg_data.get('repeat')
+            player._attr_shuffle = msg_data.get('shuffle')
+            player._attr_muted = msg_data.get('muted')
             player._attr_media_position_updated_at = datetime.now()
 
     def fire_event(self, data):
+        print(data)
         self.hass.bus.fire(manifest.domain, data)
