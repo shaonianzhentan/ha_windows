@@ -2,6 +2,13 @@ update_tile:
   name: Update Tile
   description: 更新磁贴
   fields:
+    entity_id:
+      description: Windows设备
+      required: true
+      selector:
+        entity:
+          integration: ha_windows
+          domain: media_player
     from:
       name: From
       description: 来源
@@ -26,10 +33,25 @@ update_tile:
 clear_tile:
   name: Clear Tile
   description: 清除磁贴
+  fields:
+    entity_id:
+      description: Windows设备
+      required: true
+      selector:
+        entity:
+          integration: ha_windows
+          domain: media_player
 tts:
   name: TTS
   description: 文本转语音播报
   fields:
+    entity_id:
+      description: Windows设备
+      required: true
+      selector:
+        entity:
+          integration: ha_windows
+          domain: media_player
     text:
       name: Text
       description: 文本内容
@@ -41,6 +63,13 @@ cmd:
   name: Command
   description: Windows CMD命令
   fields:
+    entity_id:
+      description: Windows设备
+      required: true
+      selector:
+        entity:
+          integration: ha_windows
+          domain: media_player
     text:
       name: Text
       description: 命令文本
@@ -52,6 +81,13 @@ shutdown:
   name: Shutdown
   description: 调用关机命令
   fields:
+    entity_id:
+      description: Windows设备
+      required: true
+      selector:
+        entity:
+          integration: ha_windows
+          domain: media_player
     second:
       name: Second
       description: 倒计时多少秒关机

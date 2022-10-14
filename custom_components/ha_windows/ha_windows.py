@@ -32,13 +32,57 @@ class HaWindows():
             self.receive_data,
             SCHEMA_WEBSOCKET
         )
+        # 注册服务
+        hass.services.async_register(manifest.domain, 'update_tile', self.update_tile)
+        hass.services.async_register(manifest.domain, 'clear_tile', self.clear_tile)
+        hass.services.async_register(manifest.domain, 'tts', self.tts_say)
+        hass.services.async_register(manifest.domain, 'cmd', self.exec_cmd)
+        hass.services.async_register(manifest.domain, 'shutdown', self.shutdown)
+
+    async def update_tile(self, service) -> None:
+        data = service.data
+        self.call_windows_app(data.get('entity_id'), 'update_tile', {
+            'from': data.get('from'),
+            'subject': data.get('subject'),
+            'body': data.get('body')
+        })
+
+    async def clear_tile(self, service) -> None:
+        data = service.data
+        self.call_windows_app(data.get('entity_id'), 'clear_tile', '')
+
+    async def tts_say(self, service) -> None:
+        data = service.data
+        text = data.get('text', '')
+        self.call_windows_app(data.get('entity_id'), 'tts', text)
+
+    async def exec_cmd(self, service) -> None:
+        data = service.data
+        text = data.get('text', '')
+        self.call_windows_app(data.get('entity_id'), 'cmd', text)
+
+    async def shutdown(self, service) -> None:
+        data = service.data
+        second = data.get('second', 60)
+        self.call_windows_app(data.get('entity_id'), 'cmd', f"shutdown -s -f -t {second}")
+
+    # 服务调用windows应用
+    def call_windows_app(self, entity_id, type, data):
+        state = self.hass.states.get(entity_id)
+        dev_id = state.attributes.get('app_id')
+        print(dev_id)
+        self.fire_event({
+            'dev_id': dev_id,
+            'type': type,
+            'data': data
+        })
 
     # 消息接收
     def receive_data(self, hass, connection, msg):
         self.connection = connection
 
         data = msg['data']
-        print(data)
+        # print(data)
 
         dev_id = data.get('dev_id')
         msg_type = data.get('type', '')
@@ -78,5 +122,5 @@ class HaWindows():
             player._attr_media_position_updated_at = datetime.now()
 
     def fire_event(self, data):
-        print(data)
+        # print(data)
         self.hass.bus.fire(manifest.domain, data)

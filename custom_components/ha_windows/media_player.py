@@ -79,6 +79,7 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
 
     def __init__(self, hass, dev_id):
         self.hass = hass
+        self._attr_app_id = dev_id
         self._attr_unique_id = dev_id
         self._attr_media_image_remotely_accessible = True
         self._attr_device_class = MediaPlayerDeviceClass.TV.value
@@ -117,36 +118,53 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
 
     async def async_set_volume_level(self, volume: float) -> None:
         self.call_windows_app('music_volume', volume)
+        self._attr_volume_level = volume
 
     async def async_volume_up(self) -> None:
         self.call_windows_app('music_volume_up')
+        volume_level = self._attr_volume_level + 0.1
+        if volume_level > 1:
+            volume_level = 1
+        self._attr_volume_level = volume_level
 
     async def async_volume_down(self) -> None:
         self.call_windows_app('music_volume_down')
+        volume_level = self._attr_volume_level - 0.1
+        if volume_level < 0.1:
+            volume_level = 0.1
+        self._attr_volume_level = volume_level
 
     async def async_media_play(self) -> None:
         self.call_windows_app('music_play')
+        self._attr_state = STATE_PLAYING
 
     async def async_media_pause(self) -> None:
         self.call_windows_app('music_pause')
+        self._attr_state = STATE_PAUSED
 
     async def async_media_next_track(self) -> None:
         self.call_windows_app('music_next')
+        self._attr_state = STATE_PAUSED
 
     async def async_media_previous_track(self) -> None:
         self.call_windows_app('music_previous')
+        self._attr_state = STATE_PAUSED
 
     async def async_mute_volume(self, mute: bool) -> None:
         self.call_windows_app('music_mute', mute)
+        self._attr_is_volume_muted = mute
 
     async def async_set_repeat(self, repeat) -> None:
         self.call_windows_app('music_repeat', repeat)
+        self._attr_repeat = repeat
 
     async def async_set_shuffle(self, shuffle: bool) -> None:
         self.call_windows_app('music_shuffle', shuffle)
+        self._attr_shuffle = shuffle
 
     async def async_media_seek(self, position: float) -> None:
         self.call_windows_app('music_position', position)
+        self._attr_media_position = position
 
     async def async_browse_media(
         self, media_content_type: str | None = None, media_content_id: str | None = None
@@ -165,6 +183,7 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
                 if result == 'index':
                     # 播放当前列表指定项
                     self.call_windows_app('music_index', self.playindex)
+                    self.load_music_info()
                 elif result.startswith('http'):
                     # HTTP播放链接
                     pass
