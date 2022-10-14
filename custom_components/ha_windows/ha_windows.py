@@ -52,6 +52,7 @@ class HaWindows():
         if msg_type == 'init':
             # 初始化数据
             player.init_playlist()
+            player._attr_state = STATE_ON
         elif msg_type == 'music_info':
             # 更新
             state = msg_data.get('state')
@@ -61,17 +62,11 @@ class HaWindows():
                 state = STATE_PAUSED
             else:
                 state = STATE_ON
-
-            print(player)
+            
             playindex = msg_data.get('index', 0)
             if  player.playindex != playindex and len(player.playlist) > playindex:
                 player.playindex = playindex
-                music_info = player.playlist[playindex]
-                player._attr_app_name = music_info.singer
-                player._attr_media_image_url = music_info.thumbnail
-                player._attr_media_album_name = music_info.album
-                player._attr_media_title = music_info.song
-                player._attr_media_artist = music_info.singer
+                player.load_music_info()
 
             player._attr_state = state
             player._attr_media_position = msg_data.get('media_position', 0)
@@ -79,7 +74,7 @@ class HaWindows():
             player._attr_volume_level = msg_data.get('volume')
             player._attr_repeat = msg_data.get('repeat')
             player._attr_shuffle = msg_data.get('shuffle')
-            player._attr_muted = msg_data.get('muted')
+            player._attr_is_volume_muted = msg_data.get('muted')
             player._attr_media_position_updated_at = datetime.now()
 
     def fire_event(self, data):

@@ -51,6 +51,7 @@ import homeassistant.util.dt as dt_util
 _LOGGER = logging.getLogger(__name__)
 
 from .manifest import manifest
+from .ha_windows import HaWindows
 
 SUPPORT_FEATURES = SUPPORT_VOLUME_STEP | SUPPORT_VOLUME_MUTE | SUPPORT_VOLUME_SET | \
     SUPPORT_SELECT_SOURCE | SUPPORT_SELECT_SOUND_MODE | \
@@ -62,11 +63,15 @@ async def async_setup_entry(
     entry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    # 播放器
     config = entry.data
     dev_id = config['dev_id']
     entity = HaWindowsMediaPlayer(hass, dev_id)
-
     hass.data.setdefault(dev_id, entity)
+    # 设置服务
+    data = hass.data.get(manifest.domain)
+    if data is None:
+        hass.data.setdefault(manifest.domain, HaWindows(hass))
 
     async_add_entities([entity], True)
 
@@ -184,6 +189,7 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
             'playindex': self.playindex,
             'playlist': playlist
         })
+        self.load_music_info()
 
     def init_playlist(self):
         playlist = []
@@ -193,3 +199,15 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
             'playindex': self.playindex,
             'playlist': playlist
         })
+        self.load_music_info()
+
+    def load_music_info(self):
+        # 加载音乐信息
+        if len(self.playlist) > self.playindex:
+            music_info = self.playlist[self.playindex]
+            self._attr_app_name = music_info.singer
+            self._attr_media_image_url = music_info.thumbnail
+            self._attr_media_album_name = music_info.album
+            self._attr_media_title = music_info.song
+            self._attr_media_artist = music_info.singer
+            self._attr_media_content_id = music_info.url

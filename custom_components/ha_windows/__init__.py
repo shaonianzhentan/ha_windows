@@ -4,18 +4,12 @@ import homeassistant.helpers.config_validation as cv
 
 from .const import PLATFORMS
 from .manifest import manifest
-from .ha_windows import HaWindows
 
 DOMAIN = manifest.domain
 
 CONFIG_SCHEMA = cv.deprecated(DOMAIN)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    
-    data = hass.data.get(DOMAIN)
-    if data is None:
-        hass.data.setdefault(DOMAIN, HaWindows(hass))
-
     hass.config_entries.async_setup_platforms(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(update_listener))
     return True
