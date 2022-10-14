@@ -120,6 +120,9 @@ class HaWindows():
             player._attr_shuffle = msg_data.get('shuffle')
             player._attr_is_volume_muted = msg_data.get('muted')
             player._attr_media_position_updated_at = datetime.now()
+        elif msg_type == 'music_pong':
+            # 判断是否在线
+            player._attr_media_position_updated_at = datetime.now()
 
     def fire_event(self, data):
         # print(data)

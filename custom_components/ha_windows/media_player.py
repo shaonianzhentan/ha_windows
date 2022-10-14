@@ -113,8 +113,11 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
     async def async_update(self) -> None:
         # 60秒无更新，则中断
         s = (datetime.now() - self._attr_media_position_updated_at).total_seconds()
-        if s > 60:
+        if s > 120:
             self._attr_state = STATE_OFF
+        elif s > 60:
+            # 判断是否在线
+            self.call_windows_app('music_ping', '')
 
     async def async_set_volume_level(self, volume: float) -> None:
         self.call_windows_app('music_volume', volume)
