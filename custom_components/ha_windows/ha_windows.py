@@ -123,6 +123,8 @@ class HaWindows():
         elif msg_type == 'music_pong':
             # 判断是否在线
             player._attr_media_position_updated_at = datetime.now()
+            if player._attr_state == STATE_OFF:
+                player._attr_state = STATE_ON
 
     def fire_event(self, data):
         # print(data)
