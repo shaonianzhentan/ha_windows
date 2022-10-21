@@ -70,7 +70,7 @@ class HaWindows():
     def call_windows_app(self, entity_id, type, data):
         state = self.hass.states.get(entity_id)
         dev_id = state.attributes.get('app_id')
-        print(dev_id)
+        # print(dev_id)
         self.fire_event({
             'dev_id': dev_id,
             'type': type,
@@ -96,6 +96,8 @@ class HaWindows():
         if msg_type == 'init':
             # 初始化数据
             player.init_playlist()
+
+            player._attr_media_position_updated_at = datetime.now()
             player._attr_state = STATE_ON
         elif msg_type == 'music_info':
             # 更新
