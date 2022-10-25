@@ -65,8 +65,9 @@ async def async_setup_entry(
 ) -> None:
     # 播放器
     config = entry.data
+    name  = config['name']
     dev_id = config['dev_id']
-    entity = HaWindowsMediaPlayer(hass, dev_id)
+    entity = HaWindowsMediaPlayer(hass, dev_id, name)
     hass.data.setdefault(dev_id, entity)
     # 设置服务
     data = hass.data.get(manifest.domain)
@@ -77,7 +78,7 @@ async def async_setup_entry(
 
 class HaWindowsMediaPlayer(MediaPlayerEntity):
 
-    def __init__(self, hass, dev_id):
+    def __init__(self, hass, dev_id, name):
         self.hass = hass
         self._attr_app_id = dev_id
         self._attr_unique_id = dev_id
@@ -88,7 +89,7 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
         # default attribute
         self._attr_source_list = []
         self._attr_sound_mode_list = []
-        self._attr_name = manifest.name
+        self._attr_name = name
         self._attr_state =  STATE_ON
         self._attr_volume_level = 1
         self._attr_repeat = 'all'
