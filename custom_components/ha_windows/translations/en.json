@@ -8,6 +8,7 @@
             "user": {
                 "description": "必须先安装云音乐插件：https://github.com/shaonianzhentan/ha_cloud_music",
                 "data": {
+                    "name": "设备名称",
                     "dev_id": "设备ID"
                 }
             }
