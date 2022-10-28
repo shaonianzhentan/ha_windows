@@ -32,6 +32,6 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
             if self.hass.data.get(user_input.get('dev_id')) is not None:
                 return self.async_abort(reason="single_instance_allowed")
 
-            return self.async_create_entry(title=DOMAIN, data=user_input)
+            return self.async_create_entry(title=user_input['name'], data=user_input)
 
         return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA, errors=errors)
