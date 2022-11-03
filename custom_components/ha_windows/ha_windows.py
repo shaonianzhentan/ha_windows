@@ -2,6 +2,7 @@ import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.config_entries import ConfigEntry
 from datetime import timedelta, datetime
+from urllib.parse import quote
 
 from homeassistant.const import (
     STATE_OFF, 
@@ -59,12 +60,13 @@ class HaWindows():
     async def exec_cmd(self, service) -> None:
         data = service.data
         text = data.get('text', '')
-        self.call_windows_app(data.get('entity_id'), 'cmd', text)
+        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?cmd={quote(text)}")
 
     async def shutdown(self, service) -> None:
         data = service.data
         second = data.get('second', 60)
-        self.call_windows_app(data.get('entity_id'), 'cmd', f"shutdown -s -f -t {second}")
+        text = f"shutdown -s -f -t {second}"
+        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?cmd={quote(text)}")
 
     # 服务调用windows应用
     def call_windows_app(self, entity_id, type, data):
