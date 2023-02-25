@@ -11,6 +11,11 @@
 
 [![Add Integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start?domain=ha_windows)
 
+> QQ交流群：`64185969`
+
+### 关联插件
+- https://github.com/shaonianzhentan/ha_cloud_music
+- https://github.com/shaonianzhentan/conversation
 
 # Windows应用
 
