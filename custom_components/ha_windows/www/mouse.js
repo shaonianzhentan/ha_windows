@@ -57,6 +57,13 @@ customElements.define("windows-mouse-panel", class extends LitElement {
         this.hass?.callApi('POST', 'events/ha_windows', data)
     }
 
+    callWindowsApp(data) {
+        dev_id = state.attributes.get('app_id')
+        this.fireEvent({
+            'dev_id': dev_id, 'type': 'homeassistant://', data
+        })
+    }
+
     isSelected() {
         return this.renderRoot.querySelector('ha-switch').checked
     }
