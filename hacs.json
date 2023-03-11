@@ -1,0 +1,8 @@
+{
+    "name": "家庭助理Windows应用",
+    "country": "CN",
+    "render_readme": true,
+    "domains": [
+        "media_player"
+    ]
+}
