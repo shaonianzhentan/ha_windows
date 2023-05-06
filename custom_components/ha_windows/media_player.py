@@ -5,7 +5,7 @@ from contextlib import suppress
 from datetime import timedelta, datetime
 import logging
 from typing import Any
-
+from urllib.parse import quote
 import voluptuous as vol
 
 from homeassistant.components.media_player import (
@@ -56,7 +56,8 @@ from .ha_windows import HaWindows
 SUPPORT_FEATURES = SUPPORT_VOLUME_STEP | SUPPORT_VOLUME_MUTE | SUPPORT_VOLUME_SET | \
     SUPPORT_SELECT_SOURCE | SUPPORT_SELECT_SOUND_MODE | \
     SUPPORT_PLAY_MEDIA | SUPPORT_PLAY | SUPPORT_PAUSE | SUPPORT_PREVIOUS_TRACK | SUPPORT_NEXT_TRACK | \
-    SUPPORT_BROWSE_MEDIA | SUPPORT_SEEK | SUPPORT_CLEAR_PLAYLIST | SUPPORT_SHUFFLE_SET | SUPPORT_REPEAT_SET
+    SUPPORT_BROWSE_MEDIA | SUPPORT_SEEK | SUPPORT_CLEAR_PLAYLIST | SUPPORT_SHUFFLE_SET | SUPPORT_REPEAT_SET | \
+    SUPPORT_TURN_ON | SUPPORT_TURN_OFF
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -155,6 +156,14 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
     async def async_media_previous_track(self) -> None:
         self.call_windows_app('music_previous')
         self._attr_state = STATE_PAUSED
+
+    async def async_turn_off(self) -> None:
+        ''' 关机命令 '''
+        text = 'shutdown -s -f -t 10'
+        self.call_windows_app('homeassistant://', f"?cmd={quote(text)}")
+
+    async def async_turn_on(self) -> None:
+        pass
 
     async def async_mute_volume(self, mute: bool) -> None:
         self.call_windows_app('music_mute', mute)
