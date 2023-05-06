@@ -3,6 +3,7 @@ update_tile:
   description: 更新磁贴
   fields:
     entity_id:
+      name: Entity ID
       description: Windows设备
       required: true
       selector:
@@ -35,6 +36,7 @@ clear_tile:
   description: 清除磁贴
   fields:
     entity_id:
+      name: Entity ID
       description: Windows设备
       required: true
       selector:
@@ -46,6 +48,7 @@ tts:
   description: 文本转语音播报
   fields:
     entity_id:
+      name: Entity ID
       description: Windows设备
       required: true
       selector:
@@ -61,9 +64,10 @@ tts:
         text:
 cmd:
   name: Command
-  description: Windows CMD命令
+  description: 使用CMD命令控制Windows电脑
   fields:
     entity_id:
+      name: Entity ID
       description: Windows设备
       required: true
       selector:
@@ -77,11 +81,31 @@ cmd:
       example: "shutdown -s -f -t 600"
       selector:
         text:
+start:
+  name: Start
+  description: 启动单独的“命令提示符”窗口来运行指定程序或命令
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Windows设备
+      required: true
+      selector:
+        entity:
+          integration: ha_windows
+          domain: media_player
+    text:
+      name: Text
+      description: 指定程序或命令
+      required: true
+      example: "https://github.com/shaonianzhentan/ha_windows"
+      selector:
+        text:
 shutdown:
   name: Shutdown
   description: 调用关机命令
   fields:
     entity_id:
+      name: Entity ID
       description: Windows设备
       required: true
       selector:

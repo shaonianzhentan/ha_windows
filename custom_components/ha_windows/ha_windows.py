@@ -38,7 +38,8 @@ class HaWindows():
         hass.services.async_register(manifest.domain, 'clear_tile', self.clear_tile)
         hass.services.async_register(manifest.domain, 'tts', self.tts_say)
         hass.services.async_register(manifest.domain, 'cmd', self.exec_cmd)
-        hass.services.async_register(manifest.domain, 'shutdown', self.shutdown)
+        hass.services.async_register(manifest.domain, 'start', self.exec_start)
+        hass.services.async_register(manifest.domain, 'shutdown', self.exec_shutdown)
 
     async def update_tile(self, service) -> None:
         data = service.data
@@ -59,20 +60,24 @@ class HaWindows():
 
     async def exec_cmd(self, service) -> None:
         data = service.data
-        text = data.get('text', '')
-        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?cmd={quote(text)}")
+        self.command(data)
 
-    async def shutdown(self, service) -> None:
+    async def exec_start(self, service) -> None:
+        data = service.data
+        self.command({ **data, 'text': 'start "HA" ' + data.get('text', '') })
+
+    async def exec_shutdown(self, service) -> None:
         data = service.data
         second = data.get('second', 60)
-        text = f"shutdown -s -f -t {second}"
-        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?cmd={quote(text)}")
+        self.command({ **data, 'text': f"shutdown -s -f -t {second}" })
+
+    def command(self, data):
+        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?cmd={quote(data.get('text'))}")
 
     # 服务调用windows应用
     def call_windows_app(self, entity_id, type, data):
         state = self.hass.states.get(entity_id)
-        dev_id = state.attributes.get('app_id')
-        # print(dev_id)
+        dev_id = state.attributes.get('dev_id')
         self.fire_event({
             'dev_id': dev_id,
             'type': type,

@@ -58,7 +58,7 @@ customElements.define("windows-mouse-panel", class extends LitElement {
     }
 
     callWindowsApp(data) {
-        dev_id = state.attributes.get('app_id')
+        dev_id = state.attributes.get('dev_id')
         this.fireEvent({
             'dev_id': dev_id, 'type': 'homeassistant://', data
         })

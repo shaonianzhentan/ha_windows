@@ -80,11 +80,13 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
 
     def __init__(self, hass, dev_id, name):
         self.hass = hass
-        self._attr_app_id = dev_id
         self._attr_unique_id = dev_id
         self._attr_media_image_remotely_accessible = True
         self._attr_device_class = MediaPlayerDeviceClass.TV.value
         self._attr_supported_features = SUPPORT_FEATURES
+        self._attr_extra_state_attributes = {
+            'dev_id': dev_id
+        }
         
         # default attribute
         self._attr_source_list = []
