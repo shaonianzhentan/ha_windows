@@ -107,7 +107,7 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
             },
             'name': self.name,
             'manufacturer': 'shaonianzhentan',
-            'model': 'CloudMusic',
+            'model': 'Windows',
             'sw_version': manifest.version
         }
 
