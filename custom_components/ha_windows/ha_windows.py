@@ -68,11 +68,13 @@ class HaWindows():
 
     async def exec_keyboard(self, service) -> None:
         data = service.data
-        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?keyboard={quote(data.get('keys'))}")
+        keys = data.get('keys').lower()
+        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?keyboard={quote(keys)}")
 
     async def exec_mouse_click(self, service) -> None:
         data = service.data
-        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?mouse_click={quote(data.get('click'))}")
+        click = data.get('click').lower()
+        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?mouse_click={quote(click)}")
 
     async def exec_mouse_pos(self, service) -> None:
         data = service.data
