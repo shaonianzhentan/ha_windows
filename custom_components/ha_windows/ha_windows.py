@@ -42,6 +42,8 @@ class HaWindows():
         hass.services.async_register(manifest.domain, 'shutdown', self.exec_shutdown)
         hass.services.async_register(manifest.domain, 'keyboard', self.exec_keyboard)
         hass.services.async_register(manifest.domain, 'mouse_click', self.exec_mouse_click)
+        hass.services.async_register(manifest.domain, 'mouse_pos', self.exec_mouse_pos)
+        hass.services.async_register(manifest.domain, 'mouse_move', self.exec_mouse_move)
 
     async def update_tile(self, service) -> None:
         data = service.data
@@ -71,6 +73,16 @@ class HaWindows():
     async def exec_mouse_click(self, service) -> None:
         data = service.data
         self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?mouse_click={quote(data.get('click'))}")
+
+    async def exec_mouse_pos(self, service) -> None:
+        data = service.data
+        point = data.get('x') + ',' + data.get('y')
+        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?mouse_pos={quote(point)}")
+
+    async def exec_mouse_move(self, service) -> None:
+        data = service.data
+        point = data.get('x') + ',' + data.get('y')
+        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?mouse_move={quote(point)}")
 
     async def exec_start(self, service) -> None:
         data = service.data

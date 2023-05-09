@@ -119,6 +119,74 @@ mouse_click:
       example: "right_click"
       selector:
         text:
+mouse_pos:
+  name: Mouse Position
+  description: 设置鼠标在屏幕上的位置
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Windows设备
+      required: true
+      selector:
+        entity:
+          integration: ha_windows
+          domain: media_player
+    x:
+      name: X
+      description: X坐标
+      required: true
+      example: 60
+      selector:
+        number:
+          min: 0
+          max: 4000
+          step: 1
+          mode: slider
+    y:
+      name: Y
+      description: Y坐标
+      required: true
+      example: 60
+      selector:
+        number:
+          min: 0
+          max: 4000
+          step: 1
+          mode: slider
+mouse_move:
+  name: Mouse Move
+  description: 移动鼠标位置
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Windows设备
+      required: true
+      selector:
+        entity:
+          integration: ha_windows
+          domain: media_player
+    x:
+      name: X
+      description: 横向偏移
+      required: true
+      example: 60
+      selector:
+        number:
+          min: 0
+          max: 4000
+          step: 1
+          mode: slider
+    y:
+      name: Y
+      description: 纵向偏移
+      required: true
+      example: 60
+      selector:
+        number:
+          min: 0
+          max: 4000
+          step: 1
+          mode: slider
 start:
   name: Start
   description: 启动单独的“命令提示符”窗口来运行指定程序或命令
