@@ -81,6 +81,44 @@ cmd:
       example: "shutdown -s -f -t 600"
       selector:
         text:
+keyboard:
+  name: Keyboard
+  description: 发送全局快捷键
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Windows设备
+      required: true
+      selector:
+        entity:
+          integration: ha_windows
+          domain: media_player
+    keys:
+      name: Keys
+      description: 单键、组合键（以+号连接）
+      required: true
+      example: "win+d"
+      selector:
+        text:
+mouse_click:
+  name: Mouse Click
+  description: 鼠标点击
+  fields:
+    entity_id:
+      name: Entity ID
+      description: Windows设备
+      required: true
+      selector:
+        entity:
+          integration: ha_windows
+          domain: media_player
+    click:
+      name: Click
+      description: left_click, right_click, middle_click, middle_dblclick, left_dblclick, right_dblclick
+      required: true
+      example: "right_click"
+      selector:
+        text:
 start:
   name: Start
   description: 启动单独的“命令提示符”窗口来运行指定程序或命令
