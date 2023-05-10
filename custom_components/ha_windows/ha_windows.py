@@ -36,14 +36,68 @@ class HaWindows():
         # 注册服务
         hass.services.async_register(manifest.domain, 'update_tile', self.update_tile)
         hass.services.async_register(manifest.domain, 'clear_tile', self.clear_tile)
+
         hass.services.async_register(manifest.domain, 'tts', self.tts_say)
+
         hass.services.async_register(manifest.domain, 'cmd', self.exec_cmd)
         hass.services.async_register(manifest.domain, 'start', self.exec_start)
         hass.services.async_register(manifest.domain, 'shutdown', self.exec_shutdown)
+
         hass.services.async_register(manifest.domain, 'keyboard', self.exec_keyboard)
         hass.services.async_register(manifest.domain, 'mouse_click', self.exec_mouse_click)
         hass.services.async_register(manifest.domain, 'mouse_pos', self.exec_mouse_pos)
         hass.services.async_register(manifest.domain, 'mouse_move', self.exec_mouse_move)
+
+    async def tts_say(self, service) -> None:
+        data = service.data
+        text = data.get('text', '')
+        self.call_windows_app(data.get('entity_id'), 'tts', text)
+
+    # region 命令
+
+    async def exec_cmd(self, service) -> None:
+        data = service.data
+        cmd = data.get('text')
+        self.exec_homeassistant(data.get('entity_id'), f"cmd={quote(cmd)}")
+
+    async def exec_start(self, service) -> None:
+        data = service.data
+        cmd = 'start "HA" ' + data.get('text', '')
+        self.exec_homeassistant(data.get('entity_id'), f"cmd={quote(cmd)}")
+
+    async def exec_shutdown(self, service) -> None:
+        data = service.data
+        second = data.get('second', 60)
+        cmd = f"shutdown -s -f -t {second}"
+        self.exec_homeassistant(data.get('entity_id'), f"cmd={quote(cmd)}")
+
+    # endregion
+
+    # region 键盘 & 鼠标操作
+
+    async def exec_keyboard(self, service) -> None:
+        data = service.data
+        keys = data.get('keys').lower()
+        self.exec_homeassistant(data.get('entity_id'), f"keyboard={quote(keys)}")
+
+    async def exec_mouse_click(self, service) -> None:
+        data = service.data
+        click = data.get('click').lower()
+        self.exec_homeassistant(data.get('entity_id'), f"mouse_click={quote(click)}")
+
+    async def exec_mouse_pos(self, service) -> None:
+        data = service.data
+        point = data.get('x') + ',' + data.get('y')
+        self.exec_homeassistant(data.get('entity_id'), f"mouse_pos={quote(point)}")
+
+    async def exec_mouse_move(self, service) -> None:
+        data = service.data
+        point = data.get('x') + ',' + data.get('y')
+        self.exec_homeassistant(data.get('entity_id'), f"mouse_move={quote(point)}")
+
+    # endregion
+
+    # region 磁贴
 
     async def update_tile(self, service) -> None:
         data = service.data
@@ -57,46 +111,12 @@ class HaWindows():
         data = service.data
         self.call_windows_app(data.get('entity_id'), 'clear_tile', '')
 
-    async def tts_say(self, service) -> None:
-        data = service.data
-        text = data.get('text', '')
-        self.call_windows_app(data.get('entity_id'), 'tts', text)
+    # endregion
 
-    async def exec_cmd(self, service) -> None:
-        data = service.data
-        self.command(data)
+    # region 服务
 
-    async def exec_keyboard(self, service) -> None:
-        data = service.data
-        keys = data.get('keys').lower()
-        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?keyboard={quote(keys)}")
-
-    async def exec_mouse_click(self, service) -> None:
-        data = service.data
-        click = data.get('click').lower()
-        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?mouse_click={quote(click)}")
-
-    async def exec_mouse_pos(self, service) -> None:
-        data = service.data
-        point = data.get('x') + ',' + data.get('y')
-        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?mouse_pos={quote(point)}")
-
-    async def exec_mouse_move(self, service) -> None:
-        data = service.data
-        point = data.get('x') + ',' + data.get('y')
-        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?mouse_move={quote(point)}")
-
-    async def exec_start(self, service) -> None:
-        data = service.data
-        self.command({ **data, 'text': 'start "HA" ' + data.get('text', '') })
-
-    async def exec_shutdown(self, service) -> None:
-        data = service.data
-        second = data.get('second', 60)
-        self.command({ **data, 'text': f"shutdown -s -f -t {second}" })
-
-    def command(self, data):
-        self.call_windows_app(data.get('entity_id'), 'homeassistant://', f"?cmd={quote(data.get('text'))}")
+    def exec_homeassistant(self, entity_id, data):
+        self.call_windows_app(entity_id, 'homeassistant://', f"?{data}")
 
     # 服务调用windows应用
     def call_windows_app(self, entity_id, type, data):
@@ -108,6 +128,8 @@ class HaWindows():
             'data': data
         })
 
+    # endregion
+    
     # 消息接收
     def receive_data(self, hass, connection, msg):
         self.connection = connection

@@ -14,7 +14,7 @@ from .manifest import manifest
 DOMAIN = manifest.domain
 
 DATA_SCHEMA = vol.Schema({
-    vol.Required('name', default=manifest.name): str,
+    vol.Required('name', default='Windows设备'): str,
     vol.Required('dev_id'): str
 })
 

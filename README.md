@@ -24,6 +24,24 @@
 
 <img src="https://github.com/shaonianzhentan/image/raw/main/ha_wechat/wechat-channel.png" height="160" alt="HomeAssistant家庭助理" title="HomeAssistant家庭助理"> 
 
+## 功能服务
+
+此功能依赖exe程序，文件进群下载
+
+- 模拟键盘
+  - 显示桌面 `win+d`
+- 模拟鼠标
+- TTS服务
+- 磁贴控制
+- CMD命令
+  - 取消关机 `shutdown -a`
+  - 60秒后重启电脑 `shutdown -r -f -t 60`
+- 定时关机
+- 启动命令
+  - 显示桌面 `explorer.exe shell:::{3080F90D-D7AD-11D9-BD98-0000947B0257}`
+  - 打开桌面上的微信 `%USERPROFILE%\desktop\微信.lnk`
+  - 使用浏览器打开网址 `https://home-assistant.io`
+
 ## Windows应用快捷键
 
 - 语音控制 Voice：`Alt` + `V`
@@ -40,3 +58,17 @@
 |支付宝|微信|
 |---|---|
 <img src="https://github.com/shaonianzhentan/image/raw/main/ha_wechat/pay_alipay.png" align="left" height="160" alt="支付宝" title="支付宝">  |  <img src="https://github.com/shaonianzhentan/image/raw/main/ha_wechat/pay_wechat.png" align="left" height="160" alt="微信支付" title="微信">
+
+---
+
+## 应用截图
+
+![ha](https://github.com/shaonianzhentan/image/raw/main/ha_windows/1.png)
+![ha](https://github.com/shaonianzhentan/image/raw/main/ha_windows/2.png)
+![ha](https://github.com/shaonianzhentan/image/raw/main/ha_windows/3.png)
+![ha](https://github.com/shaonianzhentan/image/raw/main/ha_windows/4.png)
+![ha](https://github.com/shaonianzhentan/image/raw/main/ha_windows/5.png)
+![ha](https://github.com/shaonianzhentan/image/raw/main/ha_windows/6.png)
+![ha](https://github.com/shaonianzhentan/image/raw/main/ha_windows/7.png)
+![ha](https://github.com/shaonianzhentan/image/raw/main/ha_windows/8.png)
+![ha](https://github.com/shaonianzhentan/image/raw/main/ha_windows/9.png)

@@ -114,11 +114,18 @@ mouse_click:
           domain: media_player
     click:
       name: Click
-      description: left_click, right_click, middle_click, middle_dblclick, left_dblclick, right_dblclick
+      description: 左键、右键、滚轮点击、左键双击、右键双击、滚轮双击
       required: true
       example: "right_click"
       selector:
-        text:
+        select:
+          options:
+            - "left_click"
+            - "right_click"
+            - "middle_click"
+            - "left_dblclick"
+            - "right_dblclick"
+            - "middle_dblclick"
 mouse_pos:
   name: Mouse Position
   description: 设置鼠标在屏幕上的位置
