@@ -67,8 +67,7 @@ class HaWindows():
 
     async def exec_shutdown(self, service) -> None:
         data = service.data
-        second = data.get('second', 60)
-        cmd = f"shutdown -s -f -t {second}"
+        cmd = f"shutdown -s -f -t {data.get('second', 60)}"
         self.exec_homeassistant(data.get('entity_id'), f"cmd={quote(cmd)}")
 
     # endregion
@@ -87,12 +86,12 @@ class HaWindows():
 
     async def exec_mouse_pos(self, service) -> None:
         data = service.data
-        point = data.get('x') + ',' + data.get('y')
+        point = f"{data.get('x')},{data.get('y')}"
         self.exec_homeassistant(data.get('entity_id'), f"mouse_pos={quote(point)}")
 
     async def exec_mouse_move(self, service) -> None:
         data = service.data
-        point = data.get('x') + ',' + data.get('y')
+        point = f"{data.get('x')},{data.get('y')}"
         self.exec_homeassistant(data.get('entity_id'), f"mouse_move={quote(point)}")
 
     # endregion

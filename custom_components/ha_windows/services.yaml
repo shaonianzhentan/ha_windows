@@ -114,7 +114,7 @@ mouse_click:
           domain: media_player
     click:
       name: Click
-      description: 左键、右键、滚轮点击、左键双击、右键双击、滚轮双击
+      description: 左键单击、右键单击、滚轮单击、左键双击、右键双击、滚轮双击
       required: true
       example: "right_click"
       selector:
@@ -142,22 +142,22 @@ mouse_pos:
       name: X
       description: X坐标
       required: true
-      example: 60
+      example: 100
       selector:
         number:
           min: 0
-          max: 4000
+          max: 2000
           step: 1
           mode: slider
     y:
       name: Y
       description: Y坐标
       required: true
-      example: 60
+      example: 100
       selector:
         number:
           min: 0
-          max: 4000
+          max: 2000
           step: 1
           mode: slider
 mouse_move:
@@ -174,24 +174,24 @@ mouse_move:
           domain: media_player
     x:
       name: X
-      description: 横向偏移
+      description: X坐标
       required: true
-      example: 60
+      example: 100
       selector:
         number:
-          min: 0
-          max: 4000
+          min: -1000
+          max: 1000
           step: 1
           mode: slider
     y:
       name: Y
-      description: 纵向偏移
+      description: Y坐标
       required: true
-      example: 60
+      example: 100
       selector:
         number:
-          min: 0
-          max: 4000
+          min: -1000
+          max: 1000
           step: 1
           mode: slider
 start:
