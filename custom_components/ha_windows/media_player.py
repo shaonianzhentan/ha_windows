@@ -86,6 +86,7 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
         self._attr_device_class = MediaPlayerDeviceClass.TV.value
         self._attr_supported_features = SUPPORT_FEATURES
         self._attr_extra_state_attributes = {
+            'platform': 'cloud_music',
             'dev_id': dev_id
         }
         
