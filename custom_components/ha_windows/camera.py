@@ -55,7 +55,7 @@ class ScreenCamera(WindowsCamera):
 
     def __init__(self, hass, entry):
         super().__init__(hass, entry, '屏幕')
-        self._attr_entity_picture = 'https://bingw.jasonzeng.dev/?v'
+        self._attr_entity_picture = 'https://bingw.jasonzeng.dev/?index=random'
 
     async def async_camera_image(
         self, width: int | None = None, height: int | None = None
@@ -72,7 +72,7 @@ class ComputerCamera(WindowsCamera):
 
     def __init__(self, hass, entry):
         super().__init__(hass, entry, '摄像头')
-        self._attr_entity_picture = 'https://bingw.jasonzeng.dev/?v'
+        self._attr_entity_picture = 'https://bingw.jasonzeng.dev/?index=random'
 
     async def async_camera_image(
         self, width: int | None = None, height: int | None = None
