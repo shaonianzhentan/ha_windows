@@ -179,6 +179,14 @@ class HaWindows():
             player._attr_media_position_updated_at = datetime.now()
             if player._attr_state == STATE_OFF:
                 player._attr_state = STATE_ON
+        elif msg_type == 'system_event':
+            ''' 系统事件 '''
+            if msg_data == 'lock':
+                pass
+            elif msg_data == 'unlock':
+                pass
+            elif msg_data == 'shutdown':
+                pass
 
     def fire_event(self, data):
         # print(data)
