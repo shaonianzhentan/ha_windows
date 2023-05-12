@@ -6,7 +6,7 @@ from homeassistant.components.camera import (
     DEFAULT_CONTENT_TYPE,
     PLATFORM_SCHEMA,
     Camera,
-    SUPPORT_STREAM,
+    CameraEntityFeature,
 )
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
@@ -14,7 +14,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-import io, time
+import io, time, aiohttp
 from urllib.parse import urlparse
 from .manifest import manifest
 
@@ -23,23 +23,22 @@ async def async_setup_entry(
     entry,
     async_add_entities,
 ) -> None:
-    async_add_entities([WindowsCamera(hass, entry)], True)
+    async_add_entities([
+        ScreenCamera(hass, entry),
+        ComputerCamera(hass, entry)
+    ], True)
 
 class WindowsCamera(Camera):
    
-    def __init__(self, hass, entry):
+    def __init__(self, hass, entry, name):
+        super().__init__()
         self.hass = hass
         config = entry.data
-        self._attr_unique_id = entry.entry_id
+        self._attr_unique_id = f"{entry.entry_id}{name}"
         self.device_name = config.get(CONF_NAME)
-        self._attr_name = f"{self.device_name}屏幕显示"
+        self._attr_name = f"{self.device_name}{name}"
+        self.last_frame = None
 
-    async def async_camera_image(
-        self, width: int | None = None, height: int | None = None
-    ) -> bytes | None:
-        """Return a still image response from the camera."""
-        return ''
-    
     @property
     def device_info(self):
         return {
@@ -51,3 +50,37 @@ class WindowsCamera(Camera):
             'model': 'Windows',
             'sw_version': manifest.version
         }
+
+class ScreenCamera(WindowsCamera):
+
+    def __init__(self, hass, entry):
+        super().__init__(hass, entry, '屏幕')
+        self._attr_entity_picture = 'https://bingw.jasonzeng.dev/?v'
+
+    async def async_camera_image(
+        self, width: int | None = None, height: int | None = None
+    ) -> bytes | None:
+        """Return a still image response from the camera."""
+        if (width is not None and height is not None) or self.last_frame is None:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(self._attr_entity_picture) as resp:
+                    self.last_frame = await resp.content.read()
+
+        return self.last_frame
+
+class ComputerCamera(WindowsCamera):
+
+    def __init__(self, hass, entry):
+        super().__init__(hass, entry, '摄像头')
+        self._attr_entity_picture = 'https://bingw.jasonzeng.dev/?v'
+
+    async def async_camera_image(
+        self, width: int | None = None, height: int | None = None
+    ) -> bytes | None:
+        """Return a still image response from the camera."""
+        if (width is not None and height is not None) or self.last_frame is None:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(self._attr_entity_picture) as resp:
+                    self.last_frame = await resp.content.read()
+
+        return self.last_frame
