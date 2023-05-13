@@ -14,9 +14,9 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-import io, time, aiohttp
+import io, time, aiohttp, base64
 from urllib.parse import urlparse
-from .manifest import manifest
+from .manifest import manifest, get_device_info
 
 async def async_setup_entry(
     hass,
@@ -24,7 +24,6 @@ async def async_setup_entry(
     async_add_entities,
 ) -> None:
     async_add_entities([
-        ScreenCamera(hass, entry),
         ComputerCamera(hass, entry)
     ], True)
 
@@ -34,45 +33,31 @@ class WindowsCamera(Camera):
         super().__init__()
         self.hass = hass
         config = entry.data
+        self.dev_id = config.get('dev_id')
+        self.dev_name = config.get(CONF_NAME)
         self._attr_unique_id = f"{entry.entry_id}{name}"
-        self.device_name = config.get(CONF_NAME)
-        self._attr_name = f"{self.device_name}{name}"
+        self._attr_name = f"{self.dev_name}{name}"
         self.last_frame = None
 
     @property
     def device_info(self):
-        return {
-            'identifiers': {
-                (manifest.domain, manifest.documentation)
-            },
-            'name': self.device_name,
-            'manufacturer': 'shaonianzhentan',
-            'model': 'Windows',
-            'sw_version': manifest.version
-        }
+        return get_device_info(self.dev_id, self.dev_name)
 
-class ScreenCamera(WindowsCamera):
-
-    def __init__(self, hass, entry):
-        super().__init__(hass, entry, '屏幕')
-        self._attr_entity_picture = 'https://bingw.jasonzeng.dev/?index=random'
-
-    async def async_camera_image(
-        self, width: int | None = None, height: int | None = None
-    ) -> bytes | None:
-        """Return a still image response from the camera."""
-        if (width is not None and height is not None) or self.last_frame is None:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(self._attr_entity_picture) as resp:
-                    self.last_frame = await resp.content.read()
-
-        return self.last_frame
+    @property
+    def windows_device(self):
+      return self.hass.data[manifest.domain].device[self.dev_id]
 
 class ComputerCamera(WindowsCamera):
 
     def __init__(self, hass, entry):
-        super().__init__(hass, entry, '摄像头')
+        super().__init__(hass, entry, '截图')
         self._attr_entity_picture = 'https://bingw.jasonzeng.dev/?index=random'
+        self.windows_device.append(self)
+
+    def windows_event(self, dev_id, msg_type, msg_data):
+        if dev_id == self.dev_id:
+            if msg_type == 'screenshot':
+                self.last_frame = base64.b64decode(msg_data)
 
     async def async_camera_image(
         self, width: int | None = None, height: int | None = None

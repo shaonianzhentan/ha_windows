@@ -19,7 +19,8 @@ from homeassistant.const import (
     STATE_ON, 
     STATE_PLAYING, 
     STATE_PAUSED,
-    STATE_UNAVAILABLE
+    STATE_UNAVAILABLE,
+    CONF_NAME
 )
 from homeassistant.components.media_player.const import (
     SUPPORT_BROWSE_MEDIA,
@@ -50,8 +51,7 @@ import homeassistant.util.dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
 
-from .manifest import manifest
-from .ha_windows import HaWindows
+from .manifest import manifest, get_device_info
 
 SUPPORT_FEATURES = SUPPORT_VOLUME_STEP | SUPPORT_VOLUME_MUTE | SUPPORT_VOLUME_SET | \
     SUPPORT_SELECT_SOURCE | SUPPORT_SELECT_SOUND_MODE | \
@@ -65,35 +65,93 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     # 播放器
-    config = entry.data
-    name  = config['name']
-    dev_id = config['dev_id']
-    entity = HaWindowsMediaPlayer(hass, dev_id, name)
-    hass.data.setdefault(dev_id, entity)
-    # 设置服务
-    data = hass.data.get(manifest.domain)
-    if data is None:
-        hass.data.setdefault(manifest.domain, HaWindows(hass))
+    async_add_entities([
+        CloudMusicMediaPlayer(hass, entry),
+        UniversallyMediaPlayer(hass, entry)
+    ], True)
 
-    async_add_entities([entity], True)
+class WindowsMediaPlayer(MediaPlayerEntity):
 
-class HaWindowsMediaPlayer(MediaPlayerEntity):
-
-    def __init__(self, hass, dev_id, name):
+    def __init__(self, hass, entry, name):
+        super().__init__()
         self.hass = hass
-        self._attr_unique_id = dev_id
+        config = entry.data
+        self.dev_id = config.get('dev_id')
+        self.dev_name = config.get(CONF_NAME)
+        self._attr_unique_id = f"{entry.entry_id}{name}"
+        self._attr_name = f"{self.dev_name}{name}"
+        
+    @property
+    def device_info(self):
+        return get_device_info(self.dev_id, self.dev_name)
+
+    def call_windows(self, type, data = ''):
+        self.hass.bus.fire(manifest.domain, { 'dev_id': self.dev_id, 'type': type, 'data': data })
+
+    @property
+    def windows_device(self):
+      return self.hass.data[manifest.domain].device[self.dev_id]
+
+class UniversallyMediaPlayer(WindowsMediaPlayer):
+
+    def __init__(self, hass, entry):
+        super().__init__(hass, entry, '通用播放器')
+        self.windows_device.append(self)
+        
+    async def async_update(self) -> None:
+        pass
+
+    async def async_set_volume_level(self, volume: float) -> None:
+        self._attr_volume_level = volume
+
+    async def async_volume_up(self) -> None:
+        volume_level = self._attr_volume_level + 0.1
+        if volume_level > 1:
+            volume_level = 1
+        self._attr_volume_level = volume_level
+
+    async def async_volume_down(self) -> None:
+        volume_level = self._attr_volume_level - 0.1
+        if volume_level < 0.1:
+            volume_level = 0.1
+        self._attr_volume_level = volume_level
+
+    async def async_media_play(self) -> None:
+        self._attr_state = STATE_PLAYING
+
+    async def async_media_pause(self) -> None:
+        self._attr_state = STATE_PAUSED
+
+    async def async_media_next_track(self) -> None:
+        self._attr_state = STATE_PAUSED
+
+    async def async_media_previous_track(self) -> None:
+        self._attr_state = STATE_PAUSED
+
+    async def async_turn_off(self) -> None:
+        pass
+
+    async def async_turn_on(self) -> None:
+        pass
+
+    async def async_mute_volume(self, mute: bool) -> None:
+        self._attr_is_volume_muted = mute
+
+
+class CloudMusicMediaPlayer(WindowsMediaPlayer):
+
+    def __init__(self, hass, entry):
+        super().__init__(hass, entry, '云音乐播放器')
+        self.windows_device.append(self)
+        
         self._attr_media_image_remotely_accessible = True
         self._attr_device_class = MediaPlayerDeviceClass.TV.value
         self._attr_supported_features = SUPPORT_FEATURES
-        self._attr_extra_state_attributes = {
-            'platform': 'cloud_music',
-            'dev_id': dev_id
-        }
+        self._attr_extra_state_attributes = { 'platform': 'cloud_music' }
         
         # default attribute
         self._attr_source_list = []
         self._attr_sound_mode_list = []
-        self._attr_name = name
         self._attr_state =  STATE_ON
         self._attr_volume_level = 1
         self._attr_repeat = 'all'
@@ -103,17 +161,42 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
         self.playindex = 0
         self._attr_media_position_updated_at = datetime.now()
 
-    @property
-    def device_info(self):
-        return {
-            'identifiers': {
-                (manifest.domain, manifest.documentation)
-            },
-            'name': self.name,
-            'manufacturer': 'shaonianzhentan',
-            'model': 'Windows',
-            'sw_version': manifest.version
-        }
+    def windows_event(self, dev_id, msg_type, msg_data):
+      if dev_id == self.dev_id:
+        if msg_type == 'init':
+          # 初始化数据
+          self.init_playlist()
+
+          self._attr_media_position_updated_at = datetime.now()
+          self._attr_state = STATE_ON
+        elif msg_type == 'music_info':
+            # 更新
+            state = msg_data.get('state')
+            if state == 'playing':
+                state = STATE_PLAYING
+            elif state == 'paused':
+                state = STATE_PAUSED
+            else:
+                state = STATE_ON
+            
+            playindex = msg_data.get('index', 0)
+            if  self.playindex != playindex and len(self.playlist) > playindex:
+                self.playindex = playindex
+                self.load_music_info()
+
+            self._attr_state = state
+            self._attr_media_position = msg_data.get('media_position', 0)
+            self._attr_media_duration = msg_data.get('media_duration', 0)
+            self._attr_volume_level = msg_data.get('volume')
+            self._attr_repeat = msg_data.get('repeat')
+            self._attr_shuffle = msg_data.get('shuffle')
+            self._attr_is_volume_muted = msg_data.get('muted')
+            self._attr_media_position_updated_at = datetime.now()
+        elif msg_type == 'music_pong':
+            # 判断是否在线
+            self._attr_media_position_updated_at = datetime.now()
+            if self._attr_state == STATE_OFF:
+                self._attr_state = STATE_ON
 
     async def async_update(self) -> None:
         # 60秒无更新，则中断
@@ -122,64 +205,64 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
             self._attr_state = STATE_OFF
         elif s > 60:
             # 判断是否在线
-            self.call_windows_app('music_ping', '')
+            self.call_windows('music_ping', '')
 
     async def async_set_volume_level(self, volume: float) -> None:
-        self.call_windows_app('music_volume', volume)
+        self.call_windows('music_volume', volume)
         self._attr_volume_level = volume
 
     async def async_volume_up(self) -> None:
-        self.call_windows_app('music_volume_up')
+        self.call_windows('music_volume_up')
         volume_level = self._attr_volume_level + 0.1
         if volume_level > 1:
             volume_level = 1
         self._attr_volume_level = volume_level
 
     async def async_volume_down(self) -> None:
-        self.call_windows_app('music_volume_down')
+        self.call_windows('music_volume_down')
         volume_level = self._attr_volume_level - 0.1
         if volume_level < 0.1:
             volume_level = 0.1
         self._attr_volume_level = volume_level
 
     async def async_media_play(self) -> None:
-        self.call_windows_app('music_play')
+        self.call_windows('music_play')
         self._attr_state = STATE_PLAYING
 
     async def async_media_pause(self) -> None:
-        self.call_windows_app('music_pause')
+        self.call_windows('music_pause')
         self._attr_state = STATE_PAUSED
 
     async def async_media_next_track(self) -> None:
-        self.call_windows_app('music_next')
+        self.call_windows('music_next')
         self._attr_state = STATE_PAUSED
 
     async def async_media_previous_track(self) -> None:
-        self.call_windows_app('music_previous')
+        self.call_windows('music_previous')
         self._attr_state = STATE_PAUSED
 
     async def async_turn_off(self) -> None:
         ''' 关机命令 '''
         text = 'shutdown -s -f -t 10'
-        self.call_windows_app('homeassistant://', f"?cmd={quote(text)}")
+        self.call_windows('homeassistant://', f"?cmd={quote(text)}")
 
     async def async_turn_on(self) -> None:
         pass
 
     async def async_mute_volume(self, mute: bool) -> None:
-        self.call_windows_app('music_mute', mute)
+        self.call_windows('music_mute', mute)
         self._attr_is_volume_muted = mute
 
     async def async_set_repeat(self, repeat) -> None:
-        self.call_windows_app('music_repeat', repeat)
+        self.call_windows('music_repeat', repeat)
         self._attr_repeat = repeat
 
     async def async_set_shuffle(self, shuffle: bool) -> None:
-        self.call_windows_app('music_shuffle', shuffle)
+        self.call_windows('music_shuffle', shuffle)
         self._attr_shuffle = shuffle
 
     async def async_media_seek(self, position: float) -> None:
-        self.call_windows_app('music_position', position)
+        self.call_windows('music_position', position)
         self._attr_media_position = position
 
     async def async_browse_media(
@@ -198,7 +281,7 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
             if result is not None:
                 if result == 'index':
                     # 播放当前列表指定项
-                    self.call_windows_app('music_index', self.playindex)
+                    self.call_windows('music_index', self.playindex)
                     self.load_music_info()
                 elif result.startswith('http'):
                     # HTTP播放链接
@@ -207,20 +290,13 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
                     # 添加播放列表到播放器
                     self.load_playlist()
         else:
-            self.call_windows_app('music_url', media_id)
-
-    def call_windows_app(self, type, data = ''):
-        self.hass.data[manifest.domain].fire_event({
-            'dev_id': self._attr_unique_id,
-            'type': type,
-            'data': data
-        })
+            self.call_windows('music_url', media_id)
 
     def load_playlist(self):
         playlist = []
         for item in self.playlist:
             playlist.append(item.url)
-        self.call_windows_app('music_load', {
+        self.call_windows('music_load', {
             'playindex': self.playindex,
             'playlist': playlist
         })
@@ -230,7 +306,7 @@ class HaWindowsMediaPlayer(MediaPlayerEntity):
         playlist = []
         for item in self.playlist:
             playlist.append(item.url)
-        self.call_windows_app('music_init', {
+        self.call_windows('music_init', {
             'playindex': self.playindex,
             'playlist': playlist
         })

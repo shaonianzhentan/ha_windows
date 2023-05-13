@@ -11,14 +11,12 @@ from homeassistant.core import callback
 
 from .manifest import manifest
 
-DOMAIN = manifest.domain
-
 DATA_SCHEMA = vol.Schema({
     vol.Required('name', default='Windows设备'): str,
     vol.Required('dev_id'): str
 })
 
-class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
+class SimpleConfigFlow(ConfigFlow, domain=manifest.domain):
 
     VERSION = 1
 
@@ -28,8 +26,8 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
 
         errors = {}
         if user_input is not None:
-
-            if self.hass.data.get(user_input.get('dev_id')) is not None:
+            windows = hass.data.get(manifest.domain)
+            if windows is not None and windows.device.get(user_input.get('dev_id')) is not None:
                 return self.async_abort(reason="single_instance_allowed")
 
             return self.async_create_entry(title=user_input['name'], data=user_input)

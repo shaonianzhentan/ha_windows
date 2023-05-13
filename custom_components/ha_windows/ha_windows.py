@@ -3,7 +3,7 @@ from homeassistant.components import websocket_api
 from homeassistant.config_entries import ConfigEntry
 from datetime import timedelta, datetime
 from urllib.parse import quote
-
+from homeassistant.helpers import template
 from homeassistant.const import (
     STATE_OFF, 
     STATE_ON, 
@@ -28,6 +28,8 @@ class HaWindows():
     def __init__(self, hass):
         self.hass = hass
         self.connection = None
+        # 全部设备
+        self.device = {}
         hass.components.websocket_api.async_register_command(
             HA_WINDOWS_SERVER,
             self.receive_data,
@@ -51,7 +53,7 @@ class HaWindows():
     async def tts_say(self, service) -> None:
         data = service.data
         text = data.get('text', '')
-        self.call_windows_app(data.get('entity_id'), 'tts', text)
+        self.call_windows(data.get('entity_id'), 'tts', text)
 
     # region 命令
 
@@ -100,7 +102,7 @@ class HaWindows():
 
     async def update_tile(self, service) -> None:
         data = service.data
-        self.call_windows_app(data.get('entity_id'), 'update_tile', {
+        self.call_windows(data.get('entity_id'), 'update_tile', {
             'from': data.get('from'),
             'subject': data.get('subject'),
             'body': data.get('body')
@@ -108,86 +110,41 @@ class HaWindows():
 
     async def clear_tile(self, service) -> None:
         data = service.data
-        self.call_windows_app(data.get('entity_id'), 'clear_tile', '')
+        self.call_windows(data.get('entity_id'), 'clear_tile', '')
 
     # endregion
 
     # region 服务
 
     def exec_homeassistant(self, entity_id, data):
-        self.call_windows_app(entity_id, 'homeassistant://', f"?{data}")
+        self.call_windows(entity_id, 'homeassistant://', f"?{data}")
 
     # 服务调用windows应用
-    def call_windows_app(self, entity_id, type, data):
-        state = self.hass.states.get(entity_id)
-        dev_id = state.attributes.get('dev_id')
-        self.fire_event({
-            'dev_id': dev_id,
-            'type': type,
-            'data': data
-        })
+    def call_windows(self, entity_id, type, data):
+        dev_id =  self.template("{{device_attr('" + entity_id + "', 'identifiers') ) | first | first}}")
+        self.hass.bus.fire(manifest.domain, { 'dev_id': dev_id, 'type': type, 'data': data })
 
     # endregion
     
+    # 模板解析
+    def template(self, _message):
+        tpl = template.Template(_message, self.hass)
+        _message = tpl.async_render(None)
+        return _message
+
     # 消息接收
     def receive_data(self, hass, connection, msg):
         self.connection = connection
 
         data = msg['data']
-        # print(data)
 
         dev_id = data.get('dev_id')
         msg_type = data.get('type', '')
         msg_data = data.get('data', {})
 
-        player = hass.data.get(dev_id)
-
-        if player is None:
-            return
-
-        if msg_type == 'init':
-            # 初始化数据
-            player.init_playlist()
-
-            player._attr_media_position_updated_at = datetime.now()
-            player._attr_state = STATE_ON
-        elif msg_type == 'music_info':
-            # 更新
-            state = msg_data.get('state')
-            if state == 'playing':
-                state = STATE_PLAYING
-            elif state == 'paused':
-                state = STATE_PAUSED
-            else:
-                state = STATE_ON
-            
-            playindex = msg_data.get('index', 0)
-            if  player.playindex != playindex and len(player.playlist) > playindex:
-                player.playindex = playindex
-                player.load_music_info()
-
-            player._attr_state = state
-            player._attr_media_position = msg_data.get('media_position', 0)
-            player._attr_media_duration = msg_data.get('media_duration', 0)
-            player._attr_volume_level = msg_data.get('volume')
-            player._attr_repeat = msg_data.get('repeat')
-            player._attr_shuffle = msg_data.get('shuffle')
-            player._attr_is_volume_muted = msg_data.get('muted')
-            player._attr_media_position_updated_at = datetime.now()
-        elif msg_type == 'music_pong':
-            # 判断是否在线
-            player._attr_media_position_updated_at = datetime.now()
-            if player._attr_state == STATE_OFF:
-                player._attr_state = STATE_ON
-        elif msg_type == 'system_event':
-            ''' 系统事件 '''
-            if msg_data == 'lock':
-                pass
-            elif msg_data == 'unlock':
-                pass
-            elif msg_data == 'shutdown':
-                pass
-
-    def fire_event(self, data):
-        # print(data)
-        self.hass.bus.fire(manifest.domain, data)
+        if dev_id is not None or dev_id != '':
+            entities = self.device.get(dev_id)
+            if entities is not None:
+                for entity in entities:
+                    if hasattr(entity, 'windows_event'):
+                        entity.windows_event(dev_id, msg_type, msg_data)

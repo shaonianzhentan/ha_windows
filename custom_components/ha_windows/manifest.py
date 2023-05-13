@@ -17,3 +17,14 @@ class Manifest():
         self.documentation = data.get('documentation')
 
 manifest = Manifest()
+
+def get_device_info(device_id, device_name, model=manifest.domain, manufacturer='shaonianzhentan'):
+    return {
+        'identifiers': {
+            (device_id, manifest.domain)
+        },
+        'name': device_name,
+        'manufacturer': manufacturer,
+        'model': model,
+        'sw_version': manifest.version
+    }
