@@ -56,8 +56,7 @@ from .manifest import manifest, get_device_info
 SUPPORT_FEATURES = SUPPORT_VOLUME_STEP | SUPPORT_VOLUME_MUTE | SUPPORT_VOLUME_SET | \
     SUPPORT_SELECT_SOURCE | SUPPORT_SELECT_SOUND_MODE | \
     SUPPORT_PLAY_MEDIA | SUPPORT_PLAY | SUPPORT_PAUSE | SUPPORT_PREVIOUS_TRACK | SUPPORT_NEXT_TRACK | \
-    SUPPORT_BROWSE_MEDIA | SUPPORT_SEEK | SUPPORT_CLEAR_PLAYLIST | SUPPORT_SHUFFLE_SET | SUPPORT_REPEAT_SET | \
-    SUPPORT_TURN_ON | SUPPORT_TURN_OFF
+    SUPPORT_BROWSE_MEDIA | SUPPORT_SEEK | SUPPORT_CLEAR_PLAYLIST | SUPPORT_SHUFFLE_SET | SUPPORT_REPEAT_SET
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -66,8 +65,7 @@ async def async_setup_entry(
 ) -> None:
     # 播放器
     async_add_entities([
-        CloudMusicMediaPlayer(hass, entry),
-        UniversallyMediaPlayer(hass, entry)
+        CloudMusicMediaPlayer(hass, entry)
     ], True)
 
 class WindowsMediaPlayer(MediaPlayerEntity):
@@ -92,56 +90,10 @@ class WindowsMediaPlayer(MediaPlayerEntity):
     def windows_device(self):
       return self.hass.data[manifest.domain].device[self.dev_id]
 
-class UniversallyMediaPlayer(WindowsMediaPlayer):
-
-    def __init__(self, hass, entry):
-        super().__init__(hass, entry, '通用播放器')
-        self.windows_device.append(self)
-        
-    async def async_update(self) -> None:
-        pass
-
-    async def async_set_volume_level(self, volume: float) -> None:
-        self._attr_volume_level = volume
-
-    async def async_volume_up(self) -> None:
-        volume_level = self._attr_volume_level + 0.1
-        if volume_level > 1:
-            volume_level = 1
-        self._attr_volume_level = volume_level
-
-    async def async_volume_down(self) -> None:
-        volume_level = self._attr_volume_level - 0.1
-        if volume_level < 0.1:
-            volume_level = 0.1
-        self._attr_volume_level = volume_level
-
-    async def async_media_play(self) -> None:
-        self._attr_state = STATE_PLAYING
-
-    async def async_media_pause(self) -> None:
-        self._attr_state = STATE_PAUSED
-
-    async def async_media_next_track(self) -> None:
-        self._attr_state = STATE_PAUSED
-
-    async def async_media_previous_track(self) -> None:
-        self._attr_state = STATE_PAUSED
-
-    async def async_turn_off(self) -> None:
-        pass
-
-    async def async_turn_on(self) -> None:
-        pass
-
-    async def async_mute_volume(self, mute: bool) -> None:
-        self._attr_is_volume_muted = mute
-
-
 class CloudMusicMediaPlayer(WindowsMediaPlayer):
 
     def __init__(self, hass, entry):
-        super().__init__(hass, entry, '云音乐播放器')
+        super().__init__(hass, entry, '播放器')
         self.windows_device.append(self)
         
         self._attr_media_image_remotely_accessible = True

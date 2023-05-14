@@ -121,7 +121,7 @@ class HaWindows():
 
     # 服务调用windows应用
     def call_windows(self, entity_id, type, data):
-        dev_id =  self.template("{{device_attr('" + entity_id + "', 'identifiers') ) | first | first}}")
+        dev_id =  self.template("{{device_attr('" + entity_id + "', 'identifiers') | first | first}}")
         self.hass.bus.fire(manifest.domain, { 'dev_id': dev_id, 'type': type, 'data': data })
 
     # endregion

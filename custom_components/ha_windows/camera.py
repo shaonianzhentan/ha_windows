@@ -51,7 +51,7 @@ class ComputerCamera(WindowsCamera):
 
     def __init__(self, hass, entry):
         super().__init__(hass, entry, '截图')
-        self._attr_entity_picture = 'https://bingw.jasonzeng.dev/?index=random'
+        self._attr_entity_picture = 'https://bingw.jasonzeng.dev/?v'
         self.windows_device.append(self)
 
     def windows_event(self, dev_id, msg_type, msg_data):
@@ -63,7 +63,7 @@ class ComputerCamera(WindowsCamera):
         self, width: int | None = None, height: int | None = None
     ) -> bytes | None:
         """Return a still image response from the camera."""
-        if (width is not None and height is not None) or self.last_frame is None:
+        if self.last_frame is None:
             async with aiohttp.ClientSession() as session:
                 async with session.get(self._attr_entity_picture) as resp:
                     self.last_frame = await resp.content.read()

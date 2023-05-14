@@ -10,13 +10,14 @@ async def async_setup_entry(
 ) -> None:
     async_add_entities([
       ScreenshotButton(hass, entry),
+      CameraButton(hass, entry),
       ShutdownButton(hass, entry),
-      CameraButton(hass, entry)
+      LockButton(hass, entry)      
     ], True)
 
 class WindowsButton(ButtonEntity):
 
-    def __init__(self, hass, entry, name, icon):
+    def __init__(self, hass, entry, name):
         super().__init__()
         self.hass = hass
         config = entry.data
@@ -24,7 +25,6 @@ class WindowsButton(ButtonEntity):
         self.dev_name = config.get(CONF_NAME)
         self._attr_unique_id = f"{entry.entry_id}{name}"
         self._attr_name = f"{self.dev_name}{name}"
-        self._attr_icon = f'mdi:{icon}'
 
     @property
     def device_info(self):
@@ -40,24 +40,36 @@ class WindowsButton(ButtonEntity):
 class ScreenshotButton(WindowsButton):
 
   def __init__(self, hass, entry):
-        super().__init__(hass, entry, '屏幕截图', 'monitor-screenshot')
+        super().__init__(hass, entry, '屏幕')
+        self._attr_icon = 'mdi:monitor-screenshot'
 
   async def async_press(self) -> None:
       self.call_windows('screenshot')
 
+class CameraButton(WindowsButton):
+
+  def __init__(self, hass, entry):
+        super().__init__(hass, entry, '拍照')
+        self._attr_icon = 'mdi:camera'
+
+  async def async_press(self) -> None:
+      self.call_windows('camera')
+
 class ShutdownButton(WindowsButton):
 
   def __init__(self, hass, entry):
-        super().__init__(hass, entry, '关机', 'power')
+        super().__init__(hass, entry, '关机')
+        self._attr_icon = 'mdi:power'
 
   async def async_press(self) -> None:
       cmd = f"shutdown -s -f -t 15"
       self.call_windows('homeassistant://', f'?cmd={quote(cmd)}')
 
-class CameraButton(WindowsButton):
+class LockButton(WindowsButton):
 
   def __init__(self, hass, entry):
-        super().__init__(hass, entry, '拍照', 'camera')
+        super().__init__(hass, entry, '锁屏')
+        self._attr_icon = 'mdi:monitor-lock'
 
   async def async_press(self) -> None:
-      self.call_windows('camera')
+      self.call_windows('system_lock')

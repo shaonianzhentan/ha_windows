@@ -34,7 +34,7 @@ class WindowsSensor(SensorEntity):
 class SystemEventSensor(WindowsSensor):
 
   def __init__(self, hass, entry):
-    super().__init__(hass, entry, '系统事件', 'microsoft-windows')
+    super().__init__(hass, entry, '事件', 'microsoft-windows')
     self.windows_device.append(self)
     self._attr_native_value = manifest.version
 

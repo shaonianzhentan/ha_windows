@@ -26,7 +26,7 @@ class SimpleConfigFlow(ConfigFlow, domain=manifest.domain):
 
         errors = {}
         if user_input is not None:
-            windows = hass.data.get(manifest.domain)
+            windows = self.hass.data.get(manifest.domain)
             if windows is not None and windows.device.get(user_input.get('dev_id')) is not None:
                 return self.async_abort(reason="single_instance_allowed")
 
