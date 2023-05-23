@@ -13,7 +13,7 @@ async def async_setup_entry(
 
 class WindowsSensor(SensorEntity):
 
-    def __init__(self, hass, entry, name, icon):
+    def __init__(self, hass, entry, name):
         super().__init__()
         self.hass = hass
         config = entry.data
@@ -21,7 +21,6 @@ class WindowsSensor(SensorEntity):
         self.dev_name = config.get(CONF_NAME)
         self._attr_unique_id = f"{entry.entry_id}{name}"
         self._attr_name = f"{self.dev_name}{name}"
-        self._attr_icon = f'mdi:{icon}'
 
     @property
     def device_info(self):
@@ -34,8 +33,9 @@ class WindowsSensor(SensorEntity):
 class SystemEventSensor(WindowsSensor):
 
   def __init__(self, hass, entry):
-    super().__init__(hass, entry, '事件', 'microsoft-windows')
-    self.windows_device.append(self)
+    super().__init__(hass, entry, '事件')
+    self.windows_device.append(self)    
+    self._attr_icon = 'mdi:microsoft-windows'
     self._attr_native_value = manifest.version
 
   def windows_event(self, dev_id, msg_type, msg_data):
