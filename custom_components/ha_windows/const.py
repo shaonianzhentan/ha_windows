@@ -1,1 +1,1 @@
-PLATFORMS = ["media_player", "camera", "button", "sensor", "number", "text"]
+PLATFORMS = ["media_player", "camera", "button", "sensor", "binary_sensor", "number", "text"]
