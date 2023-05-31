@@ -38,7 +38,8 @@ class WindowsInputText(WindowsText):
     def __init__(self, hass, entry):
         super().__init__(hass, entry, '文本输入')
         self._attr_icon = 'mdi:receipt-text-send'
+        self._attr_native_value = ''
 
     async def async_set_value(self, value: str) -> None:
-        self._attr_native_value = value
         self.call_windows('input_text', value)
+        self._attr_native_value = value
