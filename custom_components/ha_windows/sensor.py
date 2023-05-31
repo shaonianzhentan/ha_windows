@@ -1,5 +1,8 @@
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import CONF_NAME
+from datetime import datetime
+import logging, pytz
+
 from .manifest import manifest, get_device_info
 
 async def async_setup_entry(
@@ -8,7 +11,8 @@ async def async_setup_entry(
     async_add_entities,
 ) -> None:
     async_add_entities([
-      SystemEventSensor(hass, entry)
+      SystemEventSensor(hass, entry),
+      KeyEventSensor(hass, entry)
     ], True)
 
 class WindowsSensor(SensorEntity):
@@ -42,3 +46,25 @@ class SystemEventSensor(WindowsSensor):
     if dev_id == self.dev_id:
         if msg_type == 'system_event':
             self._attr_native_value = msg_data
+
+class KeyEventSensor(WindowsSensor):
+
+  def __init__(self, hass, entry):
+    super().__init__(hass, entry, '键盘')
+    self.timezone = pytz.timezone(hass.config.time_zone)
+    self.windows_device.append(self)    
+    self._attr_icon = 'mdi:keyboard'
+    self._attr_device_class = 'timestamp'
+
+  @property
+  def state_value(self):
+      return datetime.now(self.timezone).isoformat()
+
+  def windows_event(self, dev_id, msg_type, msg_data):
+    if dev_id == self.dev_id:
+        if msg_type == 'key_event':
+            self._attr_native_value = self.state_value
+            self._attr_extra_state_attributes = {
+              'name': msg_data['name'],
+              'code': msg_data['code']
+            }
