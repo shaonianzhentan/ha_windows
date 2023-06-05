@@ -76,6 +76,7 @@ class WindowsMediaPlayer(MediaPlayerEntity):
         config = entry.data
         self.dev_id = config.get('dev_id')
         self.dev_name = config.get(CONF_NAME)
+        self._attr_app_id = self.dev_id
         self._attr_unique_id = f"{entry.entry_id}{name}"
         self._attr_name = f"{self.dev_name}{name}"
         
