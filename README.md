@@ -24,9 +24,13 @@
 
 <img src="https://github.com/shaonianzhentan/image/raw/main/ha_wechat/wechat-channel.png" height="160" alt="HomeAssistant家庭助理" title="HomeAssistant家庭助理"> 
 
+## 消息推送
+
+无限制推送消息到你的Windows设备
+
 ## 功能服务
 
-此功能依赖exe程序，文件进群下载
+> 此功能依赖exe程序，文件进群下载
 
 - 模拟键盘
   - 显示桌面 `win+d`
