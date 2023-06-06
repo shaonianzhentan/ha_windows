@@ -21,6 +21,7 @@ class WindowsBinarySensor(BinarySensorEntity):
         self.dev_name = config.get(CONF_NAME)
         self._attr_unique_id = f"{entry.entry_id}{name}"
         self._attr_name = f"{self.dev_name}{name}"
+        self._attr_should_poll = False
 
     @property
     def device_info(self):
@@ -45,3 +46,4 @@ class LockScreenBinarySensor(WindowsBinarySensor):
             elif msg_data == '屏幕解锁':
                 self._attr_is_on = False                
                 self._attr_icon = 'mdi:monitor-dashboard'
+            self.schedule_update_ha_state()

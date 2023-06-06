@@ -25,6 +25,7 @@ class WindowsSensor(SensorEntity):
         self.dev_name = config.get(CONF_NAME)
         self._attr_unique_id = f"{entry.entry_id}{name}"
         self._attr_name = f"{self.dev_name}{name}"
+        self._attr_should_poll = False
 
     @property
     def device_info(self):
@@ -46,6 +47,7 @@ class SystemEventSensor(WindowsSensor):
     if dev_id == self.dev_id:
         if msg_type == 'system_event':
             self._attr_native_value = msg_data
+            self.schedule_update_ha_state()
 
 class KeyEventSensor(WindowsSensor):
 
@@ -64,7 +66,9 @@ class KeyEventSensor(WindowsSensor):
     if dev_id == self.dev_id:
         if msg_type == 'key_event':
             self._attr_native_value = self.state_value
+            # print(self._attr_native_value, msg_data)
             self._attr_extra_state_attributes = {
               'name': msg_data['name'],
               'code': msg_data['code']
             }
+            self.schedule_update_ha_state()

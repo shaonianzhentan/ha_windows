@@ -54,7 +54,7 @@ _LOGGER = logging.getLogger(__name__)
 from .manifest import manifest, get_device_info
 
 SUPPORT_FEATURES = SUPPORT_VOLUME_STEP | SUPPORT_VOLUME_MUTE | SUPPORT_VOLUME_SET | \
-    SUPPORT_SELECT_SOURCE | SUPPORT_SELECT_SOUND_MODE | \
+    SUPPORT_SELECT_SOURCE | SUPPORT_SELECT_SOUND_MODE | SUPPORT_TURN_ON | \
     SUPPORT_PLAY_MEDIA | SUPPORT_PLAY | SUPPORT_PAUSE | SUPPORT_PREVIOUS_TRACK | SUPPORT_NEXT_TRACK | \
     SUPPORT_BROWSE_MEDIA | SUPPORT_SEEK | SUPPORT_CLEAR_PLAYLIST | SUPPORT_SHUFFLE_SET | SUPPORT_REPEAT_SET
 
@@ -195,12 +195,12 @@ class CloudMusicMediaPlayer(WindowsMediaPlayer):
         self._attr_state = STATE_PAUSED
 
     async def async_turn_off(self) -> None:
-        ''' 关机命令 '''
-        text = 'shutdown -s -f -t 10'
-        self.call_windows('homeassistant://', f"?cmd={quote(text)}")
+        pass
 
     async def async_turn_on(self) -> None:
-        pass
+        ''' 启动服务 '''
+        text = 'start home-assistant://'
+        self.call_windows('homeassistant://', f"?cmd={quote(text)}")
 
     async def async_mute_volume(self, mute: bool) -> None:
         self.call_windows('music_mute', mute)
