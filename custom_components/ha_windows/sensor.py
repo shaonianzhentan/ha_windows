@@ -58,7 +58,7 @@ class KeyEventSensor(WindowsSensor):
 
   @property
   def state_value(self):
-      return datetime.now(self.timezone).isoformat()
+      return datetime.now(self.timezone)
 
   def windows_event(self, dev_id, msg_type, msg_data):
     if dev_id == self.dev_id:
