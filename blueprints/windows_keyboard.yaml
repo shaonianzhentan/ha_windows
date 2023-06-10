@@ -1,0 +1,111 @@
+blueprint:
+  name: Windows键盘控制
+  description: 使用【HomeAssistant桌面小助手】监听Windows系统按键消息
+  domain: automation
+  source_url: https://github.com/shaonianzhentan/ha_windows/blob/master/blueprints/windows_keyboard.yaml
+  input:
+    entity:
+      name: Windows设备键盘
+      description: Windows设备的键盘传感器
+      default: []
+      selector:
+        entity:
+          integration: ha_windows
+          domain: sensor
+    key_48:
+      name: 数字0
+      description: 键码48
+      default: []
+      selector:
+        action: {}
+    key_49:
+      name: 数字1
+      description: 键码49
+      default: []
+      selector:
+        action: {}
+    key_50:
+      name: 数字2
+      description: 键码50
+      default: []
+      selector:
+        action: {}
+    key_51:
+      name: 数字3
+      description: 键码51
+      default: []
+      selector:
+        action: {}
+    key_52:
+      name: 数字4
+      description: 键码52
+      default: []
+      selector:
+        action: {}
+    key_53:
+      name: 数字5
+      description: 键码53
+      default: []
+      selector:
+        action: {}
+    key_54:
+      name: 数字6
+      description: 键码54
+      default: []
+      selector:
+        action: {}
+    key_55:
+      name: 数字7
+      description: 键码55
+      default: []
+      selector:
+        action: {}
+    key_56:
+      name: 数字8
+      description: 键码56
+      default: []
+      selector:
+        action: {}
+    key_57:
+      name: 数字9
+      description: 键码57
+      default: []
+      selector:
+        action: {}
+trigger:
+- platform: state
+  entity_id: !input entity
+action:
+- variables:
+    code: '{{ state_attr(trigger.entity_id, "code") }}'
+- choose:
+  - conditions:
+    - '{{ code == 48 }}'
+    sequence: !input key_48
+  - conditions:
+    - '{{ code == 49 }}'
+    sequence: !input key_49
+  - conditions:
+    - '{{ code == 50 }}'
+    sequence: !input key_50
+  - conditions:
+    - '{{ code == 51 }}'
+    sequence: !input key_51
+  - conditions:
+    - '{{ code == 52 }}'
+    sequence: !input key_52
+  - conditions:
+    - '{{ code == 53 }}'
+    sequence: !input key_53
+  - conditions:
+    - '{{ code == 54 }}'
+    sequence: !input key_54
+  - conditions:
+    - '{{ code == 55 }}'
+    sequence: !input key_55
+  - conditions:
+    - '{{ code == 56 }}'
+    sequence: !input key_56
+  - conditions:
+    - '{{ code == 57 }}'
+    sequence: !input key_57
