@@ -12,7 +12,8 @@ async def async_setup_entry(
       ScreenshotButton(hass, entry),
       CameraButton(hass, entry),
       ShutdownButton(hass, entry),
-      LockButton(hass, entry)      
+      LockButton(hass, entry),
+      MonitorOffButton(hass, entry)
     ], True)
 
 class WindowsButton(ButtonEntity):
@@ -62,8 +63,7 @@ class ShutdownButton(WindowsButton):
         self._attr_icon = 'mdi:power'
 
   async def async_press(self) -> None:
-      cmd = f"shutdown -s -f -t 15"
-      self.call_windows('homeassistant://', f'?cmd={quote(cmd)}')
+      self.call_windows('shutdown')
 
 class LockButton(WindowsButton):
 
@@ -73,3 +73,12 @@ class LockButton(WindowsButton):
 
   async def async_press(self) -> None:
       self.call_windows('system_lock')
+
+class MonitorOffButton(WindowsButton):
+
+  def __init__(self, hass, entry):
+        super().__init__(hass, entry, '熄屏')
+        self._attr_icon = 'mdi:monitor-off'
+
+  async def async_press(self) -> None:
+      self.call_windows('monitorpower', False)
