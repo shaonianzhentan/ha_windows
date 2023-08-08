@@ -156,8 +156,9 @@ class CloudMusicMediaPlayer(WindowsMediaPlayer):
         s = (datetime.now() - self._attr_media_position_updated_at).total_seconds()
         if s > 120:
             self._attr_state = STATE_OFF
-        elif s > 60:
-            # 判断是否在线
+
+        # 判断是否在线
+        if s > 60:
             self.call_windows('music_ping', '')
 
     async def async_set_volume_level(self, volume: float) -> None:
@@ -245,23 +246,32 @@ class CloudMusicMediaPlayer(WindowsMediaPlayer):
         else:
             self.call_windows('music_url', media_id)
 
-    def load_playlist(self):
+    def format_playlist(self):
         playlist = []
         for item in self.playlist:
-            playlist.append(item.url)
+            playlist.append({
+                'song': item.song,
+                'singer': item.singer,
+                'url': item.url,
+                'image': item.thumbnail
+            })
+        return playlist
+
+    def load_playlist(self):
+        ''' Windows应用播放列表更新 '''
         self.call_windows('music_load', {
+            'entity_id': self.entity_id,
             'playindex': self.playindex,
-            'playlist': playlist
+            'playlist': self.format_playlist()
         })
         self.load_music_info()
 
     def init_playlist(self):
-        playlist = []
-        for item in self.playlist:
-            playlist.append(item.url)
+        ''' Windows应用初始化 '''
         self.call_windows('music_init', {
+            'entity_id': self.entity_id,
             'playindex': self.playindex,
-            'playlist': playlist
+            'playlist': self.format_playlist()
         })
         self.load_music_info()
 
