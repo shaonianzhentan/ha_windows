@@ -18,6 +18,12 @@
 
 [![Add Integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start?domain=ha_windows)
 
+
+按键蓝图
+
+[![导入蓝图](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fshaonianzhentan%2Fha_windows%2Fblob%2Fmain%2Fblueprints%2Fwindows_keyboard.yaml)
+
+
 ### 免费获取应用兑换码
 
 关注微信公众号，回复`家庭助理Windows应用`，留言即可免费获取应用兑换码一个
