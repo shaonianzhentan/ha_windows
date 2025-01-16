@@ -10,7 +10,7 @@
 [![badge](https://img.shields.io/badge/Conversation-语音小助手-049cdb?logo=homeassistant&style=for-the-badge)](https://github.com/shaonianzhentan/conversation)
 [![badge](https://img.shields.io/badge/ha_cloud_music-云音乐-ff0000?logo=homeassistant&style=for-the-badge)](https://github.com/shaonianzhentan/ha_cloud_music)
 
-[![badge](https://img.shields.io/badge/QQ群-64185969-76beff?logo=tencentqq&style=for-the-badge)](https://qm.qq.com/cgi-bin/qm/qr?k=m4uDQuuAJCnCll6PuQZUnnJ0zEy7zuk2&jump_from=webapi&authKey=WTxRChNkBUDdVsTcYHeO8yb98Uu8WGJC3hxw53Il4PB7RgBTQ6StHa43MwZJtN5w)
+[![badge](https://img.shields.io/badge/QQ群-61417349-76beff?logo=tencentqq&style=for-the-badge)](https://qm.qq.com/cgi-bin/qm/qr?k=m4uDQuuAJCnCll6PuQZUnnJ0zEy7zuk2&jump_from=webapi&authKey=WTxRChNkBUDdVsTcYHeO8yb98Uu8WGJC3hxw53Il4PB7RgBTQ6StHa43MwZJtN5w)
 
 ### 插件安装
 
@@ -38,19 +38,13 @@
 
 > 此功能依赖exe程序，文件进群下载
 
-- 模拟键盘
-  - 显示桌面 `win+d`
-- 模拟鼠标
-- TTS服务
-- 磁贴控制
-- CMD命令
-  - 取消关机 `shutdown -a`
-  - 60秒后重启电脑 `shutdown -r -f -t 60`
-- 定时关机
-- 启动命令
-  - 显示桌面 `explorer.exe shell:::{3080F90D-D7AD-11D9-BD98-0000947B0257}`
-  - 打开桌面上的微信 `%USERPROFILE%\desktop\微信.lnk`
-  - 使用浏览器打开网址 `https://home-assistant.io`
+**执行CMD命令**
+```yaml
+action: notify.mobile_app_设备名称
+data:
+  title: SYSTEM_CMD
+  message: shutdown /s /f /t 10
+```
 
 ## Windows应用快捷键
 
